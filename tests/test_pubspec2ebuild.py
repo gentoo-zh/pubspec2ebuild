@@ -58,9 +58,22 @@ class Rejections(unittest.TestCase):
         with self.assertRaises(SystemExit):
             p2e.git_packages(self.packages(uni_links={"url": "https://gitlab.com/x/y"}))
 
-    def test_unknown_source_is_ignored(self):
-        packages = self.packages()
-        packages["args"]["source"] = "sdk"
-        self.assertEqual(p2e.hosted_packages(packages), [
-            ("path", "1.9.0", "087ce49c3f0dc39180befefc60fdb4acd8f8620e5682fe2476afd0b3688bb4af"),
-        ])
+    def test_sdk_source_needs_no_distfile(self):
+        lock = FIXTURES / "sdk.lock"
+        lock.write_text((FIXTURES / "workspace.lock").read_text().replace(
+            "    source: hosted\n    version: \"1.9.0\"",
+            "    source: sdk\n    version: \"1.9.0\""))
+        try:
+            self.assertNotIn("path", p2e.load_packages(lock))
+        finally:
+            lock.unlink()
+
+    def test_unknown_source_stops(self):
+        lock = FIXTURES / "bad.lock"
+        lock.write_text((FIXTURES / "workspace.lock").read_text().replace(
+            "source: hosted", "source: ftp", 1))
+        try:
+            with self.assertRaises(SystemExit):
+                p2e.load_packages(lock)
+        finally:
+            lock.unlink()

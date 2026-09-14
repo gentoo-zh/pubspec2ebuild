@@ -17,17 +17,26 @@ import yaml
 PUB_DEV = "https://pub.dev"
 
 
-def load_packages(lockfile):
-    """The packages section of a pubspec.lock.
+KNOWN_SOURCES = {"hosted", "git", "path", "sdk"}
 
-    A pub workspace writes one lockfile at the workspace root; packages resolved
-    from a path inside the workspace ("source: path") ship with the project and
-    need no distfile, so they are dropped here.
+
+def load_packages(lockfile):
+    """The packages section of a pubspec.lock, minus what needs no distfile.
+
+    pub knows four sources. "path" packages ship with the project (a pub
+    workspace resolves its members this way) and "sdk" packages come with the
+    Flutter SDK, so both are dropped here. Anything else is not a pub lockfile
+    this tool understands, so it stops rather than silently leaving a package
+    out of SRC_URI.
     """
     with open(lockfile) as f:
         data = yaml.safe_load(f) or {}
     packages = data.get("packages") or {}
-    return {n: i for n, i in packages.items() if i.get("source") != "path"}
+    for name, info in packages.items():
+        source = info.get("source")
+        if source not in KNOWN_SOURCES:
+            raise SystemExit(f"{name}: unknown pub source {source!r}")
+    return {n: i for n, i in packages.items() if i["source"] in ("hosted", "git")}
 
 
 def hosted_packages(packages):
