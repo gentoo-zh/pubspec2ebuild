@@ -1,0 +1,9 @@
+PUB_HOSTED=(
+	"args 2.6.0 bf9f5caeea8d8fe6721a9c358dd8a5c1947b27f1cfaa18b39c301273594919e6"
+	"path 1.9.0 087ce49c3f0dc39180befefc60fdb4acd8f8620e5682fe2476afd0b3688bb4af"
+)
+
+PUB_GIT=(
+	"pasteboard https://github.com/Seidko/flutter-plugins.git 58748dae405df5e68a131e4905d48e75d0624be2 packages/pasteboard"
+	"uni_links https://github.com/rustdesk-org/uni_links f416118d843a7e9ed117c7bb7bdc2deda5a9e86f ."
+)
